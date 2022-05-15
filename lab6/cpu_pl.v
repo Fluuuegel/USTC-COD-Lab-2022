@@ -42,6 +42,11 @@ module cpu_pl(
 
 wire branch;
 wire jump;
+wire br_pred_f; //IF
+wire br_pred_d; //ID
+wire br_pred_e; //EX
+wire [31:0] br_pred_pc_f;
+
 wire [31:0] pc;
 wire [31:0] pc_in;
 wire [31:0] pc_plus4;
@@ -135,7 +140,7 @@ wire stallpl;
 wire dFlush;
 wire eFlush;
 
-hazard_detection hazard_detection(IDEXdm_rd_ctrl, IDEXRd, IFIDinst[19:15], IFIDinst[24:20], PCWrite, IFIDWrite, stallpl, branch, dFlush, eFlush);
+hazard_detection hazard_detection(IDEXdm_rd_ctrl, IDEXRd, IFIDinst[19:15], IFIDinst[24:20], PCWrite, IFIDWrite, stallpl, branch, br_pred_e, jump, dFlush, eFlush);
 
 reg rf_wr_en_hd;
 reg [1:0] dm_wr_ctrl_hd;
@@ -184,9 +189,22 @@ assign mdr = MEMWBdm_dout;
 assign rdw = MEMWBRd;
 assign ctrlw = {29'b0, MEMWBrf_wr_en, MEMWBrf_wr_sel};
 
-program_counter program_counter(clk, rst, branch, jump, alu_out, PCWrite, pc, pcin, pc_plus4);
+program_counter program_counter(
+    clk, 
+    rst, 
+    branch, 
+    br_pred_e, 
+    br_pred_f,
+    br_pred_pc_f,
+    jump,
+    alu_out,
+    PCWrite,
+    pc,
+    pcin,
+    pc_plus4
+);
 
-IFID IFID(clk, pc_in, inst, IFIDWrite, IFIDpc, IFIDinst, dFlush);
+IFID IFID(clk, pc_in, inst, IFIDWrite, IFIDpc, IFIDinst, dFlush, br_pred_f, br_pred_d);
 
 register_file register_file(.clk (clk), .rst (rst), .ra0 (IFIDinst[19:15]), .ra1 (IFIDinst[24:20]), .ra2 (m_rf_addr[4:0]), .wa (MEMWBRd), .wd (rf_wd), .we (MEMWBrf_wr_en), .rd0 (rf_rd0), .rd1 (rf_rd1), .rd2 (rf_data));
 
@@ -196,7 +214,7 @@ controller controller(IFIDinst, rf_wr_en, alu_a_sel, alu_b_sel, alu_ctrl, dm_rd_
 
 IDEX IDEX(clk, IFIDpc, IFIDinst[11:7], imm_out, rf_rd0, rf_rd1, rf_wr_en_hd, alu_a_sel, alu_b_sel, alu_ctrl, dm_rd_ctrl, dm_wr_ctrl_hd, rf_wr_sel, comp_ctrl, do_branch, do_jump, IDEXpc, 
 IDEXRd, IDEXImm, IDEXrf_rd0, IDEXrf_rd1, IDEXrf_wr_en, IDEXalu_a_sel, IDEXalu_b_sel, IDEXalu_ctrl, IDEXdm_rd_ctrl, IDEXdm_wr_ctrl, IDEXrf_wr_sel, IDEXcomp_ctrl, IDEXdo_branch, IDEXdo_jump, 
-IFIDinst[19:15], IFIDinst[24:20], eFlush, IDEXRs1, IDEXRs2);
+IFIDinst[19:15], IFIDinst[24:20], eFlush, IDEXRs1, IDEXRs2, br_pred_d, br_pred_e);
 
 alu alu(alu_a, alu_b, IDEXalu_ctrl, alu_out);
 
@@ -209,6 +227,18 @@ ins_mem ins_mem(.a (pc_in[9:2]), .spo (inst));
 data_mem data_mem(.a (EXMEMalu_out[9:0]), .d (EXMEMrf_rd1), .dpra (m_rf_addr), .clk (clk), .we (dm_wr_ctrl_aft), .spo (dm_dout), .dpo (m_data), .dm_rd_ctrl (EXMEMdm_rd_ctrl));
 
 MEMWB MEMWB(clk, EXMEMrf_wr_en, EXMEMrf_wr_sel, dm_dout_aft, EXMEMalu_out, EXMEMRd, EXMEMpc, MEMWBrf_wr_en, MEMWBrf_wr_sel, MEMWBdm_dout, MEMWBalu_out, MEMWBRd, MEMWBpc);
+
+//branch prediction
+BTB BTB(.clk (clk),
+        .rst (rst),
+        .rd_pc (pc),
+        .rd_pred_pc (br_pred_pc_f),
+        .rd_pred (br_pred_f),
+        .wr_req (br_pred_e ^ branch),
+        .wr_pc (pce),
+        .wr_pred_pc (alu_out),
+        .wr_pred_state_bit(branch)
+);
 
 //the last mux
 always@(*) begin

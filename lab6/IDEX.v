@@ -38,7 +38,11 @@ module IDEX(
     input eFlush,
 
     output reg [4:0] IDEXRs1,
-    output reg [4:0] IDEXRs2
+    output reg [4:0] IDEXRs2,
+
+    //br_pred
+    input br_pred_d,
+    output reg br_pred_e
 );
 
 always@(posedge clk) begin
@@ -62,6 +66,8 @@ always@(posedge clk) begin
 
         IDEXRs1 <= 0;
         IDEXRs2 <= 0;
+
+        br_pred_e <= 0;
     end
     else begin
         IDEXpc <= IFIDpc;
@@ -83,6 +89,8 @@ always@(posedge clk) begin
 
         IDEXRs1 <= IFIDRs1;
         IDEXRs2 <= IFIDRs2;
+
+        br_pred_e <= br_pred_d;
     end
 end
 

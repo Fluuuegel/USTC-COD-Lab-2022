@@ -2,7 +2,13 @@ module program_counter(
     input clk,
     input rst,
     input br,
+
+    //branch prediction signals
+    input br_pred_e,
+    input br_pred_f,
+    input [31:0] br_pred_pc,
     input jump,
+
     input [31:0] alu_out,
     input PCWrite,
 
@@ -13,9 +19,12 @@ module program_counter(
 
 
 always@(*) begin
-    if(br || jump) pcin <= alu_out;
-    else if(PCWrite) pcin <= pc_plus4;
-    else pcin <= pc;
+    if(jump) pcin <= alu_out;
+    else if(br && ~br_pred_e) pcin <= alu_out;  //预测不跳转但实际跳转
+    else if(~br && br_pred_e) pcin <= pc_plus4; //预测跳转但实际不跳转
+    else if(br_pred_f) pcin <= br_pred_pc;    
+    else if(!PCWrite) pcin <= pc;  //idk if branch prediction has conflict with data hazard
+    else pcin <= pc_plus4;
 end
 
 always@(posedge clk or posedge rst) begin

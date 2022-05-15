@@ -33,6 +33,6 @@ always@(*) begin
 end
 
 assign branch = taken && do_branch;
-assign jump = do_jimp;
+assign jump = do_jump;
 
 endmodule

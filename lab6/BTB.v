@@ -13,6 +13,7 @@ module BTB(
 //ins_mem为256x32，故pc有效位是[9:2]
 reg [31:0] pred_pc [0: 1 << 6];
 reg pred_state_bit [0: 1 << 6];
+integer i;
 
 always@(*) begin
     if(pred_state_bit[rd_pc[9:2]]) rd_pred = 1'b1;
@@ -22,7 +23,7 @@ end
 
 always@(posedge clk or posedge rst) begin
     if(rst) begin
-        for(integer i = 0; i < 1 << 6; i = i + 1) begin
+        for(i = 0; i < 1 << 6; i = i + 1) begin
             pred_pc[i] <= 0;
             pred_state_bit[i] <= 1'b0;
         end
