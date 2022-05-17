@@ -10,16 +10,29 @@ module data_mem (
     input [2:0] dm_rd_ctrl
 );
 reg [3:0] byte_en;
-reg [31:0] mem[0:255];
+reg [31:0] mem[0:4095];    //255
 reg [31:0] mem_out;
+
+wire [31:0] mem_vis [0:10];
+assign mem_vis[0][31:0] = mem[0][31:0];
+assign mem_vis[1][31:0] = mem[1][31:0];
+assign mem_vis[2][31:0] = mem[2][31:0];
+assign mem_vis[3][31:0] = mem[3][31:0];
+assign mem_vis[4][31:0] = mem[4][31:0];
+assign mem_vis[5][31:0] = mem[5][31:0];
+assign mem_vis[6][31:0] = mem[6][31:0];
+assign mem_vis[7][31:0] = mem[7][31:0];
+assign mem_vis[8][31:0] = mem[8][31:0];
+assign mem_vis[9][31:0] = mem[9][31:0];
+
 integer i;
 
 initial begin
-    for(i = 0; i < 255; i = i + 1) mem[i] = 0;
+    for(i = 0; i <= 4095; i = i + 1) mem[i] = 0;
 end
 
 initial begin
-    $readmemh("/home/ubuntu/文档/Code/COD/lab6/coe/data.coe",mem);
+    $readmemh("/home/ubuntu/data.coe",mem);
 end
 
 assign dpo = mem[dpra];

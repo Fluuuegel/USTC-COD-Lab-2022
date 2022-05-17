@@ -38,6 +38,7 @@ wire [31:0] ctrlw;
 cpu_pl cpu_pl(clk, rst, io_addr, io_dout, io_we, io_din, m_rf_addr, rf_data, m_data, pc_out, pcd, ir, pcin, pce, a, b, imm_debug, rd, ctrl, y, bm, rdm, ctrlm, ym, mdr, rdw, ctrlw);
 
 initial begin 
+    io_din = 0;
     rst = 1; m_rf_addr = 0; 
     clk = 1;#5
     clk = 0;
@@ -47,7 +48,7 @@ initial begin
 end
 
 initial begin
-    #1200 $finish;
+    #12000 $finish;
 end
 
 endmodule

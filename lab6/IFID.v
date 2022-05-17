@@ -3,7 +3,7 @@ module IFID(
     
     input [31:0]pc_in,
     input [31:0] inst,
-    input IFIDWrite,
+    input fStall,
 
     output reg [31:0] IFIDpc,
     output reg [31:0] IFIDinst,
@@ -21,7 +21,7 @@ always@(posedge clk) begin
         IFIDinst <= 32'b0;
         br_pred_d <= 32'b0;
     end
-    else if(!IFIDWrite) begin
+    else if(fStall) begin
         IFIDpc <= IFIDpc;
         IFIDinst <= IFIDinst;
         br_pred_d <= br_pred_d;
