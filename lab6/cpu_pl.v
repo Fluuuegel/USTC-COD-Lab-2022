@@ -114,7 +114,17 @@ wire [1:0] ForwardB;
 reg [31:0] IDEXrf_rd0_fd;
 reg [31:0] IDEXrf_rd1_fd;
 
-forward forward(IDEXRs1, IDEXRs2, IDEXRd, EXMEMRd, MEMWBRd, EXMEMrf_wr_en, MEMWBrf_wr_en, ForwardA, ForwardB);
+forward forward(
+    .IDEXRs1 (IDEXRs1), 
+    .IDEXRs2 (IDEXRs2), 
+    .IDEXRd (IDEXRd), 
+    .EXMEMRd (EXMEMRd), 
+    .MEMWBRd (MEMWBRd), 
+    .EXMEMrf_wr_en (EXMEMrf_wr_en), 
+    .MEMWBrf_wr_en (MEMWBrf_wr_en), 
+    .ForwardA (ForwardA), 
+    .ForwardB (ForwardB)
+);
 
 always@(*) begin
     case (ForwardA)
@@ -135,23 +145,24 @@ end
 //hazard detection
 wire fStall;
 wire dStall;
-
 wire dFlush;
 wire eFlush;
 
-hazard_detection hazard_detection(IDEXdm_rd_ctrl, IDEXRd, IFIDinst[19:15], IFIDinst[24:20], fStall, dStall, branch, br_pred_e, jump, dFlush, eFlush);
-
-// reg rf_wr_en_hd;
-// reg [1:0] dm_wr_ctrl_hd;
-// always@(*) begin
-//     if(!fStall) rf_wr_en_hd <= 1'b0;
-//     else rf_wr_en_hd <= rf_wr_en;
-//     if(!fStall) dm_wr_ctrl_hd <= 1'b0;
-//     else dm_wr_ctrl_hd <= dm_wr_ctrl;
-// end
+hazard_detection hazard_detection(
+    .IDEXdm_rd_ctrl (IDEXdm_rd_ctrl), 
+    .IDEXRd (IDEXRd), 
+    .IFIDRs1 (IFIDinst[19:15]), 
+    .IFIDRs2 (IFIDinst[24:20]), 
+    .fStall (fStall), 
+    .dStall (dStall), 
+    .branch (branch), 
+    .br_pred_e (br_pred_e), 
+    .jump (jump), 
+    .dFlush (dFlush), 
+    .eFlush (eFlush)
+);
 
 //io_bus
-//FIXME:
 assign dm_wr_ctrl_aft = (~(io_addr[10])) & EXMEMdm_wr_ctrl;  //AND gate
 assign dm_dout_aft = (io_addr[10]) ? io_din : dm_dout;    //Mux
 assign io_dout = rf_wd;
@@ -162,6 +173,7 @@ assign alu_a = IDEXalu_a_sel ? IDEXrf_rd0_fd : IDEXpc;
 assign alu_b = IDEXalu_b_sel ? IDEXImm : IDEXrf_rd1_fd;
 assign pc_in = (pc >= 32'h3000 && pc <= 32'h33ff) ? pc : 32'h0;
 
+//debug_bus
 assign pc_out = pc_in;
 assign pcd = IFIDpc;
 assign ir = IFIDinst;
@@ -170,14 +182,32 @@ assign a = IDEXrf_rd0;
 assign b = IDEXrf_rd1;
 assign imm_debug = IDEXImm;
 assign rd = IDEXRd;
-
-assign ctrl = {fStall, dStall, dFlush, eFlush, 2'b0 , ForwardA , 2'b0, ForwardB, 1'b0, IDEXrf_wr_en, IDEXrf_wr_sel, IDEXdm_rd_ctrl, IDEXdm_wr_ctrl, 2'b0, IDEXdo_jump, IDEXdo_branch, 2'b0, alu_a_sel, alu_b_sel, alu_ctrl};
-
+assign ctrl = {
+    fStall,
+    dStall,
+    dFlush,
+    eFlush,
+    2'b0 ,
+    ForwardA ,
+    2'b0,
+    ForwardB, 
+    1'b0, 
+    IDEXrf_wr_en, 
+    IDEXrf_wr_sel, 
+    IDEXdm_rd_ctrl, 
+    IDEXdm_wr_ctrl, 
+    2'b0, 
+    IDEXdo_jump, 
+    IDEXdo_branch, 
+    2'b0, 
+    alu_a_sel, 
+    alu_b_sel, 
+    alu_ctrl
+};
 assign y = EXMEMalu_out;
 assign bm = EXMEMrf_rd1;
 assign rdm = EXMEMRd;
 assign ctrlm = {27'b0, EXMEMdm_rd_ctrl, EXMEMdm_wr_ctrl};
-
 assign yw = MEMWBalu_out;
 assign mdr = MEMWBdm_dout;
 assign rdw = MEMWBRd;
@@ -199,18 +229,20 @@ program_counter program_counter(
     .pc_plus4 (pc_plus4)
 );
 
-IFID IFID(clk, 
-    pc_in, 
-    inst, 
-    dStall, 
-    IFIDpc, 
-    IFIDinst, 
-    dFlush, 
-    br_pred_f, 
-    br_pred_d
+IFID IFID(
+    .clk (clk), 
+    .pc_in (pc_in), 
+    .inst (inst), 
+    .dStall (dStall), 
+    .IFIDpc (IFIDpc), 
+    .IFIDinst (IFIDinst), 
+    .dFlush (dFlush), 
+    .br_pred_f (br_pred_f), 
+    .br_pred_d (br_pred_d)
 );
 
-register_file register_file(.clk (clk), 
+register_file register_file(
+    .clk (clk), 
     .rst (rst), 
     .ra0 (IFIDinst[19:15]), 
     .ra1 (IFIDinst[24:20]), 
@@ -223,70 +255,75 @@ register_file register_file(.clk (clk),
     .rd2 (rf_data)
 );
 
-imm imm(.inst (IFIDinst), 
+imm imm(
+    .inst (IFIDinst), 
     .imm_out (imm_out)
 );
 
-controller controller(IFIDinst, 
-    rf_wr_en, 
-    alu_a_sel, 
-    alu_b_sel, 
-    alu_ctrl, 
-    dm_rd_ctrl, 
-    dm_wr_ctrl, 
-    rf_wr_sel, 
-    comp_ctrl, 
-    do_branch, 
-    do_jump
+controller controller(
+    .inst (IFIDinst), 
+    .rf_wr_en (rf_wr_en), 
+    .alu_a_sel (alu_a_sel), 
+    .alu_b_sel (alu_b_sel), 
+    .alu_ctrl (alu_ctrl), 
+    .dm_rd_ctrl (dm_rd_ctrl), 
+    .dm_wr_ctrl (dm_wr_ctrl), 
+    .rf_wr_sel (rf_wr_sel), 
+    .comp_ctrl (comp_ctrl), 
+    .do_branch (do_branch), 
+    .do_jump (do_jump)
 );
 
-IDEX IDEX(clk, 
-    IFIDpc, 
-    IFIDinst[11:7], 
-    imm_out, 
-    rf_rd0, 
-    rf_rd1, 
-    rf_wr_en, 
-    alu_a_sel, 
-    alu_b_sel, 
-    alu_ctrl, 
-    dm_rd_ctrl, 
-    dm_wr_ctrl, 
-    rf_wr_sel, 
-    comp_ctrl, 
-    do_branch, 
-    do_jump, 
-    IDEXpc, 
-    IDEXRd, 
-    IDEXImm, 
-    IDEXrf_rd0, 
-    IDEXrf_rd1, 
-    IDEXrf_wr_en, 
-    IDEXalu_a_sel, 
-    IDEXalu_b_sel, 
-    IDEXalu_ctrl, 
-    IDEXdm_rd_ctrl, 
-    IDEXdm_wr_ctrl, 
-    IDEXrf_wr_sel, 
-    IDEXcomp_ctrl, 
-    IDEXdo_branch, 
-    IDEXdo_jump, 
-    IFIDinst[19:15], 
-    IFIDinst[24:20], 
-    eFlush, 
-    IDEXRs1, 
-    IDEXRs2, 
-    br_pred_d, 
-    br_pred_e
+IDEX IDEX(
+    .clk (clk), 
+    .IFIDpc (IFIDpc), 
+    .Rd (IFIDinst[11:7]), 
+    .Imm (imm_out), 
+    .rf_rd0 (rf_rd0), 
+    .rf_rd1 (rf_rd1), 
+    .rf_wr_en (rf_wr_en), 
+    .alu_a_sel (alu_a_sel), 
+    .alu_b_sel (alu_b_sel), 
+    .alu_ctrl (alu_ctrl), 
+    .dm_rd_ctrl (dm_rd_ctrl), 
+    .dm_wr_ctrl (dm_wr_ctrl), 
+    .rf_wr_sel (rf_wr_sel), 
+    .comp_ctrl (comp_ctrl), 
+    .do_branch (do_branch), 
+    .do_jump (do_jump), 
+    .IDEXpc (IDEXpc), 
+    .IDEXRd (IDEXRd), 
+    .IDEXImm (IDEXImm), 
+    .IDEXrf_rd0 (IDEXrf_rd0), 
+    .IDEXrf_rd1 (IDEXrf_rd1), 
+    .IDEXrf_wr_en (IDEXrf_wr_en), 
+    .IDEXalu_a_sel (IDEXalu_a_sel), 
+    .IDEXalu_b_sel (IDEXalu_b_sel), 
+    .IDEXalu_ctrl (IDEXalu_ctrl), 
+    .IDEXdm_rd_ctrl (IDEXdm_rd_ctrl), 
+    .IDEXdm_wr_ctrl (IDEXdm_wr_ctrl), 
+    .IDEXrf_wr_sel (IDEXrf_wr_sel), 
+    .IDEXcomp_ctrl (IDEXcomp_ctrl), 
+    .IDEXdo_branch (IDEXdo_branch), 
+    .IDEXdo_jump (IDEXdo_jump), 
+    .IFIDRs1 (IFIDinst[19:15]), 
+    .IFIDRs2 (IFIDinst[24:20]), 
+    .eFlush (eFlush), 
+    .IDEXRs1 (IDEXRs1), 
+    .IDEXRs2 (IDEXRs2), 
+    .br_pred_d (br_pred_d), 
+    .br_pred_e (br_pred_e)
 );
 
-alu alu(alu_a, 
-    alu_b, 
-    IDEXalu_ctrl, 
-    alu_out
+alu alu(
+    .a (alu_a), 
+    .b (alu_b), 
+    .alu_ctrl (IDEXalu_ctrl), 
+    .alu_out (alu_out)
 );
 
-br br(.a (IDEXrf_rd0_fd), 
+br br(
+    .a (IDEXrf_rd0_fd), 
     .b (IDEXrf_rd1_fd), 
     .comp_ctrl (IDEXcomp_ctrl), 
     .do_branch (IDEXdo_branch), 
@@ -295,30 +332,33 @@ br br(.a (IDEXrf_rd0_fd),
     .jump (jump)
 );
 
-EXMEM EXMEM(clk, 
-    alu_out, 
-    IDEXrf_rd1_fd, 
-    IDEXRd, 
-    IDEXpc, 
-    IDEXrf_wr_en, 
-    IDEXdm_rd_ctrl, 
-    IDEXdm_wr_ctrl, 
-    IDEXrf_wr_sel, 
-    EXMEMalu_out, 
-    EXMEMrf_rd1, 
-    EXMEMRd, 
-    EXMEMpc, 
-    EXMEMrf_wr_en, 
-    EXMEMdm_rd_ctrl, 
-    EXMEMdm_wr_ctrl, 
-    EXMEMrf_wr_sel
+EXMEM EXMEM(
+    .clk (clk),
+    .alu_out (alu_out),
+    .IDEXrf_rd1(IDEXrf_rd1_fd),
+    .IDEXRd (IDEXRd),
+    .IDEXpc (IDEXpc),
+    .IDEXrf_wr_en (IDEXrf_wr_en),
+    .IDEXdm_rd_ctrl (IDEXdm_rd_ctrl),
+    .IDEXdm_wr_ctrl (IDEXdm_wr_ctrl),
+    .IDEXrf_wr_sel (IDEXrf_wr_sel),
+    .EXMEMalu_out (EXMEMalu_out),
+    .EXMEMrf_rd1 (EXMEMrf_rd1),
+    .EXMEMRd (EXMEMRd),
+    .EXMEMpc (EXMEMpc),
+    .EXMEMrf_wr_en (EXMEMrf_wr_en), 
+    .EXMEMdm_rd_ctrl (EXMEMdm_rd_ctrl),
+    .EXMEMdm_wr_ctrl (EXMEMdm_wr_ctrl),
+    .EXMEMrf_wr_sel (EXMEMrf_wr_sel)
 );
 
-ins_mem ins_mem(.a (pc_in[9:2]), 
+ins_mem ins_mem(
+    .a (pc_in[9:2]), 
     .spo (inst)
 );
 
-data_mem data_mem(.a (EXMEMalu_out[9:0]), 
+data_mem data_mem(
+    .a (EXMEMalu_out[9:0]), 
     .d (EXMEMrf_rd1), 
     .dpra (m_rf_addr), 
     .clk (clk), 
@@ -328,32 +368,33 @@ data_mem data_mem(.a (EXMEMalu_out[9:0]),
     .dm_rd_ctrl (EXMEMdm_rd_ctrl)
 );
 
-MEMWB MEMWB(clk, 
-    EXMEMrf_wr_en, 
-    EXMEMrf_wr_sel, 
-    dm_dout, 
-    EXMEMalu_out, 
-    EXMEMRd, 
-    EXMEMpc, 
-    MEMWBrf_wr_en, 
-    MEMWBrf_wr_sel, 
-    MEMWBdm_dout, 
-    MEMWBalu_out, 
-    MEMWBRd, 
-    MEMWBpc
+MEMWB MEMWB(
+    .clk (clk), 
+    .EXMEMrf_wr_en (EXMEMrf_wr_en), 
+    .EXMEMrf_wr_sel (EXMEMrf_wr_sel), 
+    .dm_dout (dm_dout),  //if use stack please change dm_dout_aft to dm_dout
+    .EXMEMalu_out (EXMEMalu_out), 
+    .EXMEMRd (EXMEMRd), 
+    .EXMEMpc (EXMEMpc), 
+    .MEMWBrf_wr_en (MEMWBrf_wr_en), 
+    .MEMWBrf_wr_sel (MEMWBrf_wr_sel), 
+    .MEMWBdm_dout (MEMWBdm_dout), 
+    .MEMWBalu_out (MEMWBalu_out), 
+    .MEMWBRd (MEMWBRd), 
+    .MEMWBpc (MEMWBpc)
 );
-//if use stack please change dm_dout_aft to dm_dout
 
 //branch prediction
-BTB BTB(.clk (clk),
-        .rst (rst),
-        .rd_pc (pc),
-        .rd_pred_pc (br_pred_pc_f),
-        .rd_pred (br_pred_f),
-        .wr_req (br_pred_e ^ branch),
-        .wr_pc (pce),
-        .wr_pred_pc (alu_out),
-        .wr_pred_state_bit(branch)
+BTB BTB(
+    .clk (clk),
+    .rst (rst),
+    .rd_pc (pc),
+    .rd_pred_pc (br_pred_pc_f),
+    .rd_pred (br_pred_f),
+    .wr_req (br_pred_e ^ branch),
+    .wr_pc (pce),
+    .wr_pred_pc (alu_out),
+    .wr_pred_state_bit(branch)
 );
 
 //the last mux

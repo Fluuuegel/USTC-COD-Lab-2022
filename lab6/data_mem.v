@@ -13,7 +13,7 @@ reg [3:0] byte_en;
 reg [31:0] mem[0:4095];    //255
 reg [31:0] mem_out;
 
-wire [31:0] mem_vis [0:10];
+wire [31:0] mem_vis [0:9];
 assign mem_vis[0][31:0] = mem[0][31:0];
 assign mem_vis[1][31:0] = mem[1][31:0];
 assign mem_vis[2][31:0] = mem[2][31:0];
