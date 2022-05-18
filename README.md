@@ -4,4 +4,6 @@
 
 + Addition and changes in lab4 including `rx.v` `tx.v` are served for lab6.
 
-+ in lab6 you may change the memory file path in `data_mem.v`.
++ In lab6 you may change the memory file path in `data_mem.v`.
+
++ Lab reports are in the other repo of mine. [Click here to check it out](https://github.com/Fluuuegel/USTC-COD-HW-2022)
