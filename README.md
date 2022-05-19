@@ -6,4 +6,4 @@
 
 + In lab6 you may change the memory file path in `data_mem.v`.
 
-+ Lab reports are in the other repo of mine. [Click here to check it out](https://github.com/Fluuuegel/USTC-COD-HW-2022)
++ Lab reports are in the other repo. [Click here to check it out](https://github.com/Fluuuegel/USTC-COD-HW-2022)
