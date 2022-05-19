@@ -24,11 +24,9 @@ end
 always@(posedge clk or posedge rst) begin
     if(rst) begin
         for(i = 0; i < 1 << 6; i = i + 1) begin
-            pred_pc[i] <= 0;
-            pred_state_bit[i] <= 1'b0;
+            pred_pc[i] = 0;
+            pred_state_bit[i] = 1'b0;
         end
-        rd_pred <= 0;
-        rd_pred_pc <= 0;
     end else begin 
         if(wr_req) begin
             pred_pc[wr_pc[9:2]] <= wr_pred_pc;

@@ -28,11 +28,21 @@ assign mem_vis[9][31:0] = mem[9][31:0];
 integer i;
 
 initial begin
-    for(i = 0; i <= 4095; i = i + 1) mem[i] = 0;
+    for(i = 10; i <= 4095; i = i + 1) mem[i] = 0;
 end
 
 initial begin
-    $readmemh("/home/ubuntu/data.coe",mem);
+    //$readmemh("/home/ubuntu/data.coe",mem); if wanna generate bitstream, shouldn't use $readmemh
+    mem[0] = 32'h3;
+    mem[1] = 32'h5;
+    mem[2] = 32'h3;
+    mem[3] = 32'h0;
+    mem[4] = 32'h8;
+    mem[5] = 32'h6;
+    mem[6] = 32'h1;
+    mem[7] = 32'h5;
+    mem[8] = 32'h8;
+    mem[9] = 32'h6;
 end
 
 assign dpo = mem[dpra];
