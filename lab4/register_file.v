@@ -23,7 +23,9 @@ integer i;
 always @(posedge clk) begin
     if(rst) begin
         for(i = 0; i <= 31; i = i + 1) begin
-            regfile[i] <= 32'b0;
+            if(i == 2) regfile[i] <= 32'h2ffc;
+            else if(i == 3) regfile[i] <= 32'h1800;
+            else regfile[i] <= 32'b0;
         end
     end
     else if(we) begin

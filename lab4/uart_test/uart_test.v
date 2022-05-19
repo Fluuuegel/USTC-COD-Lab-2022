@@ -9,6 +9,10 @@ wire rx_vld;
 wire [7:0] rx_data;
 reg [7:0] temp_data;
 
+initial begin
+    temp_data = 8'b11111111;     
+end
+
 rx                  rx_inst(
 .clk                (clk),
 .rst                (rst),
