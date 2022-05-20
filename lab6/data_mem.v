@@ -13,36 +13,42 @@ reg [3:0] byte_en;
 reg [31:0] mem[0:4095];    //255
 reg [31:0] mem_out;
 
-wire [31:0] mem_vis [0:9];
-assign mem_vis[0][31:0] = mem[0][31:0];
-assign mem_vis[1][31:0] = mem[1][31:0];
-assign mem_vis[2][31:0] = mem[2][31:0];
-assign mem_vis[3][31:0] = mem[3][31:0];
-assign mem_vis[4][31:0] = mem[4][31:0];
-assign mem_vis[5][31:0] = mem[5][31:0];
-assign mem_vis[6][31:0] = mem[6][31:0];
-assign mem_vis[7][31:0] = mem[7][31:0];
-assign mem_vis[8][31:0] = mem[8][31:0];
-assign mem_vis[9][31:0] = mem[9][31:0];
+//in case that couldn't generate mem's wave when running simulation
+// wire [31:0] mem_vis [0:9];
+// assign mem_vis[0][31:0] = mem[0][31:0];
+// assign mem_vis[1][31:0] = mem[1][31:0];
+// assign mem_vis[2][31:0] = mem[2][31:0];
+// assign mem_vis[3][31:0] = mem[3][31:0];
+// assign mem_vis[4][31:0] = mem[4][31:0];
+// assign mem_vis[5][31:0] = mem[5][31:0];
+// assign mem_vis[6][31:0] = mem[6][31:0];
+// assign mem_vis[7][31:0] = mem[7][31:0];
+// assign mem_vis[8][31:0] = mem[8][31:0];
+// assign mem_vis[9][31:0] = mem[9][31:0];
 
 integer i;
 
 initial begin
     for(i = 0; i <= 4095; i = i + 1) mem[i] = 0;
+
+    //for heap_sort inition
+    //for(i = 10; i <= 4095; i = i + 1) mem[i] = 0;
 end
 
 initial begin
-    //$readmemh("/home/ubuntu/data.coe",mem); //if wanna generate bitstream, shouldn't use $readmemh
-    mem[0] = 32'h3;
-    mem[1] = 32'h5;
-    mem[2] = 32'h3;
-    mem[3] = 32'h0;
-    mem[4] = 32'h8;
-    mem[5] = 32'h6;
-    mem[6] = 32'h1;
-    mem[7] = 32'h5;
-    mem[8] = 32'h8;
-    mem[9] = 32'h6;
+    $readmemh("/home/ubuntu/data.coe",mem); //if wanna generate bitstream, shouldn't use $readmemh
+
+    //for heap_sort inition
+    // mem[0] = 32'h3;
+    // mem[1] = 32'h5;
+    // mem[2] = 32'h3;
+    // mem[3] = 32'h0;
+    // mem[4] = 32'h8;
+    // mem[5] = 32'h6;
+    // mem[6] = 32'h1;
+    // mem[7] = 32'h5;
+    // mem[8] = 32'h8;
+    // mem[9] = 32'h6;
 end
 
 assign dpo = mem[dpra];
