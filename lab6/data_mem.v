@@ -28,11 +28,11 @@ assign mem_vis[9][31:0] = mem[9][31:0];
 integer i;
 
 initial begin
-    for(i = 10; i <= 4095; i = i + 1) mem[i] = 0;
+    for(i = 0; i <= 4095; i = i + 1) mem[i] = 0;
 end
 
 initial begin
-    //$readmemh("/home/ubuntu/data.coe",mem); if wanna generate bitstream, shouldn't use $readmemh
+    //$readmemh("/home/ubuntu/data.coe",mem); //if wanna generate bitstream, shouldn't use $readmemh
     mem[0] = 32'h3;
     mem[1] = 32'h5;
     mem[2] = 32'h3;
@@ -76,9 +76,9 @@ always@(*) begin
     end
     else if(we == 2'b11) begin
         case(a[1:0])
-        2'b00: byte_en = 4'b1;
-        2'b01: byte_en = 4'b10;
-        2'b10: byte_en = 4'b100;
+        2'b00: byte_en = 4'b0001;
+        2'b01: byte_en = 4'b0010;
+        2'b10: byte_en = 4'b0100;
         2'b11: byte_en = 4'b1000;
         default: byte_en = 4'b0;
         endcase
