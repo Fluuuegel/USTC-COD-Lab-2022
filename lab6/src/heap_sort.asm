@@ -1,0 +1,204 @@
+.data
+.word 3
+.word 5
+.word 3
+.word 0
+.word 8
+.word 6
+.word 1
+.word 5
+.word 8
+.word 6
+.word 2
+.word 4
+.word 9
+.word 4
+.word 7
+.word 0
+.word 1
+.word 8
+.word 9
+.word 7
+.word 3
+.word 1
+.word 2
+.word 5
+.word 9
+.word 7
+.word 4
+.word 0
+.word 2
+.word 6
+
+.text
+main:
+addi	x2,x2,-32
+sw	x1,28(x2)
+sw	x8,24(x2)
+addi	x8,x2,32
+addi	x15,x0,10
+sw	x15,-20(x8)
+lw	x11,-20(x8)
+addi	x10,x0,0
+jal	x1,heap_sort
+addi	x15,x0,0
+addi	x10,x15,0
+lw	x1,28(x2)
+lw	x8,24(x2)
+addi	x2,x2,32
+jalr	x0,0(x1)
+
+swap:
+addi	x2,x2,-48
+sw	x8,44(x2)
+addi	x8,x2,48
+sw	x10,-36(x8)
+sw	x11,-40(x8)
+lw	x15,-40(x8)
+lw	x15,0(x15)
+sw	x15,-20(x8)
+lw	x15,-36(x8)
+lw	x14,0(x15)
+lw	x15,-40(x8)
+sw	x14,0(x15)
+lw	x15,-36(x8)
+lw	x14,-20(x8)
+sw	x14,0(x15)
+addi	x0,x0,0
+lw	x8,44(x2)
+addi	x2,x2,48
+jalr	x0,0(x1)
+
+max_heapify:
+addi	x2,x2,-48
+sw	x1,44(x2)
+sw	x8,40(x2)
+addi	x8,x2,48
+sw	x10,-36(x8)
+sw	x11,-40(x8)
+sw	x12,-44(x8)
+lw	x15,-40(x8)
+sw	x15,-20(x8)
+lw	x15,-20(x8)
+slli	x15,x15,0x1
+addi	x15,x15,1
+sw	x15,-24(x8)
+jal	x0,max_heapify_0xf0
+max_heapify_0x38:
+lw	x14,-24(x8)
+lw	x15,-44(x8)
+bge	x14,x15,max_heapify_0x80
+lw	x15,-24(x8)
+slli	x15,x15,0x2
+lw	x14,-36(x8)
+add	x15,x14,x15
+lw	x14,0(x15)
+lw	x15,-24(x8)
+addi	x15,x15,1
+slli	x15,x15,0x2
+lw	x13,-36(x8)
+add	x15,x13,x15
+lw	x15,0(x15)
+bge	x14,x15,max_heapify_0x80
+lw	x15,-24(x8)
+addi	x15,x15,1
+sw	x15,-24(x8)
+max_heapify_0x80:
+lw	x15,-20(x8)
+slli	x15,x15,0x2
+lw	x14,-36(x8)
+add	x15,x14,x15
+lw	x14,0(x15)
+lw	x15,-24(x8)
+slli	x15,x15,0x2
+lw	x13,-36(x8)
+add	x15,x13,x15
+lw	x15,0(x15)
+blt	x15,x14,max_heapify_0x100
+lw	x15,-20(x8)
+slli	x15,x15,0x2
+lw	x14,-36(x8)
+add	x13,x14,x15
+lw	x15,-24(x8)
+slli	x15,x15,0x2
+lw	x14,-36(x8)
+add	x15,x14,x15
+addi	x11,x15,0
+addi	x10,x13,0
+jal	x1,swap
+lw	x15,-24(x8)
+sw	x15,-20(x8)
+lw	x15,-20(x8)
+slli	x15,x15,0x1
+addi	x15,x15,1
+sw	x15,-24(x8)
+max_heapify_0xf0:
+lw	x14,-24(x8)
+lw	x15,-44(x8)
+bge	x15,x14,max_heapify_0x38
+jal	x0,max_heapify_0x104
+max_heapify_0x100:
+addi	x0,x0,0
+max_heapify_0x104:
+lw	x1,44(x2)
+lw	x8,40(x2)
+addi	x2,x2,48
+jalr	x0,0(x1)
+
+heap_sort:
+addi	x2,x2,-48
+sw	x1,44(x2)
+sw	x8,40(x2)
+addi	x8,x2,48
+sw	x10,-36(x8)
+sw	x11,-40(x8)
+lw	x15,-40(x8)
+srli	x14,x15,0x1f
+add	x15,x14,x15
+srai	x15,x15,0x1
+addi	x15,x15,-1
+sw	x15,-20(x8)
+jal	x0,heap_sort_0x58
+heap_sort_0x34:
+lw	x15,-40(x8)
+addi	x15,x15,-1
+addi	x12,x15,0
+lw	x11,-20(x8)
+lw	x10,-36(x8)
+jal	x1,max_heapify
+lw	x15,-20(x8)
+addi	x15,x15,-1
+sw	x15,-20(x8)
+heap_sort_0x58:
+lw	x15,-20(x8)
+bge	x15,x0,heap_sort_0x34
+lw	x15,-40(x8)
+addi	x15,x15,-1
+sw	x15,-20(x8)
+jal	x0,heap_sort_0xb0
+heap_sort_0x70:
+lw	x15,-20(x8)
+slli	x15,x15,0x2
+lw	x14,-36(x8)
+add	x15,x14,x15
+addi	x11,x15,0
+lw	x10,-36(x8)
+jal	x1,swap
+lw	x15,-20(x8)
+addi	x15,x15,-1
+addi	x12,x15,0
+addi	x11,x0,0
+lw	x10,-36(x8)
+jal	x1,max_heapify
+lw	x15,-20(x8)
+addi	x15,x15,-1
+sw	x15,-20(x8)
+heap_sort_0xb0:
+lw	x15,-20(x8)
+blt	x0,x15,heap_sort_0x70
+addi	x0,x0,0
+addi	x0,x0,0
+lw	x1,44(x2)
+lw	x8,40(x2)
+addi	x2,x2,48
+jalr	x0,0(x1)
